@@ -1,0 +1,15 @@
+<h1>Lista de Cursos</h1>
+<a href="/app/curso/create">Novo Curso</a>
+<table border="1">
+    <tr><th>ID</th><th>Nome</th><th>Ações</th></tr>
+    {% for curso in cursos %}
+    <tr>
+        <td>{{ curso.id }}</td>
+        <td>{{ curso.nome }}</td>
+        <td>
+            <a href="/app/curso/edit?id={{ curso.id }}">Editar</a>
+            <a href="/app/curso/delete?id={{ curso.id }}">Excluir</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>

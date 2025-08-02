@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Gerar Lista de Convocação</title>
+</head>
+<body>
+  <h1>Gerar Lista de Convocação</h1>
+  <form method="post" action="/app/convocacao/gerar">
+    <label>Selecione a Edição:
+      <select name="edicao_id" required>
+        <option value="">-- escolha --</option>
+        {% for e in edicoes %}
+          <option value="{{ e.id }}">{{ e.nome }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <br><br>
+
+    <label>Selecione os Cursos (Ctrl⎈ + clique para múltiplos):
+      <select name="curso_ids" multiple size="6" required>
+        {% for c in cursos %}
+          <option value="{{ c.id }}">{{ c.nome }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <p style="font-size:0.9em;color:#666">
+      Segure Ctrl (ou ⌘) e clique para escolher mais de um curso.
+    </p>
+    <br>
+
+    <label>Multiplicador (X):
+      <input type="number" name="multiplicador" value="1" min="1">
+    </label>
+    <br><br>
+
+    <button type="submit">Gerar Convocação</button>
+  </form>
+  <a href="/app/edicao/index">← Voltar à lista de Edições</a>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<h1>Lista de Edições do SISU</h1>
+<a href="/app/edicao/create">Nova Edição</a>
+<table border="1">
+    <tr><th>ID</th><th>Nome</th><th>Ações</th></tr>
+    {% for edicao in edicoes %}
+    <tr>
+        <td>{{ edicao.id }}</td>
+        <td>{{ edicao.nome }}</td>
+        <td>
+            <a href="/app/edicao/delete?id={{ edicao.id }}">Excluir</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>

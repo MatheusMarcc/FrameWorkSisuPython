@@ -1,0 +1,47 @@
+<!-- logo acima do form, dentro da tag <form> -->
+<form
+  id="edicaoForm"
+  data-counter="{{ detalhes|length }}"
+  method="post"
+  action="/app/edicao/{{ edicao.id and 'update' or 'store' }}"
+>
+  {% if edicao.id %}
+    <input type="hidden" name="id" value="{{ edicao.id }}">
+  {% endif %}
+  <!-- resto do formulário... -->
+</form>
+
+<script>
+(function() {
+  // pega o form e inicia o contador a partir do atributo data-counter
+  const form = document.getElementById("edicaoForm");
+  let counter = parseInt(form.dataset.counter, 10) || 0;
+
+  window.addCurso = function() {
+    const inp = document.getElementById("curso_selector");
+    const [id, ...parts] = inp.value.split(" - ");
+    if (!id) return;
+    const nome = parts.join(" - ");
+    const tbl = document.getElementById("cursos_table");
+    const row = tbl.insertRow(-1);
+
+    row.innerHTML = `
+      <input type="hidden" name="cursos[${counter}][curso_id]" value="${id}">
+      <td>${id} – ${nome}</td>
+      <td><input type="number" name="cursos[${counter}][vagas_ac]" value="0"></td>
+      <td><input type="number" name="cursos[${counter}][vagas_ppi_br]" value="0"></td>
+      <td><input type="number" name="cursos[${counter}][vagas_publica_br]" value="0"></td>
+      <td><input type="number" name="cursos[${counter}][vagas_ppi_publica]" value="0"></td>
+      <td><input type="number" name="cursos[${counter}][vagas_publica]" value="0"></td>
+      <td><input type="number" name="cursos[${counter}][vagas_deficientes]" value="0"></td>
+      <td><button type="button" onclick="removeRow(this)">🗑️</button></td>
+    `;
+    counter++;
+    inp.value = "";
+  };
+
+  window.removeRow = function(btn) {
+    btn.closest("tr").remove();
+  };
+})();
+</script>

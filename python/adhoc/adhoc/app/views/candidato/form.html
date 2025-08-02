@@ -1,0 +1,23 @@
+<h1>{{ 'Editar' if candidato.id else 'Novo' }} Candidato</h1>
+<form method="post" action="/app/candidato/{{ 'update' if candidato.id else 'store' }}">
+    {% if candidato.id %}
+        <input type="hidden" name="id" value="{{ candidato.id }}">
+    {% endif %}
+    <label>Nome:</label><input type="text" name="nome" value="{{ candidato.nome or '' }}"><br>
+    <label>CPF:</label><input type="text" name="cpf" value="{{ candidato.cpf or '' }}"><br>
+    <label>Data de Nascimento:</label><input type="date" name="data_nascimento" value="{{ candidato.data_nascimento or '' }}"><br>
+    <label>Categoria:</label><input type="text" name="categoria" value="{{ candidato.categoria or '' }}"><br>
+    <label>Curso ID:</label><input type="number" name="curso_id" value="{{ candidato.curso_id or '' }}"><br>
+    <label>Nota:</label><input type="number" step="0.01" name="nota" value="{{ candidato.nota or '' }}"><br>
+    <input type="submit" value="Salvar">
+    {% if error %}
+  <p style="color:red">{{ error }}</p>
+{% endif %}
+<form method="post" action="/app/candidato/store">
+  {% if candidato.id %}
+    <input type="hidden" name="id" value="{{ candidato.id }}">
+  {% endif %}
+  <!-- resto dos campos -->
+
+</form>
+<a href="/app/candidato/index">Voltar</a>

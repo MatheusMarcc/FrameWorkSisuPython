@@ -1,0 +1,9 @@
+<h1>{{ 'Editar' if curso.id else 'Novo' }} Curso</h1>
+<form method="post" action="/app/curso/{{ 'update' if curso.id else 'store' }}">
+    {% if curso.id %}
+        <input type="hidden" name="id" value="{{ curso.id }}">
+    {% endif %}
+    <label>Nome:</label><input type="text" name="nome" value="{{ curso.nome or '' }}"><br>
+    <input type="submit" value="Salvar">
+</form>
+<a href="/app/curso/index">Voltar</a>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Painel SISU</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:system-ui,sans-serif; }
+    body { background:#fafafa; color:#333; display:flex; justify-content:center; }
+    .container { width:100%; max-width:800px; padding:30px; }
+    h1 { text-align:center; margin-bottom:30px; color:#111; }
+    .tabs { text-align:center; margin-bottom:20px; }
+    .btn { background:#444; color:#fff; border:none; padding:10px 20px; margin:0 5px; border-radius:4px; cursor:pointer; transition:background .2s; }
+    .btn:hover { background:#333; }
+    .section { display:none; margin-top:20px; }
+    .section.active { display:block; }
+    form { background:#fff; padding:20px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.1); margin-bottom:30px; }
+    label { display:block; margin-bottom:12px; color:#555; }
+    input, select { width:100%; padding:8px; margin-top:4px; border:1px solid #ddd; border-radius:4px; }
+    table { width:100%; border-collapse:collapse; margin-top:12px; }
+    th, td { padding:8px 12px; border:1px solid #eee; text-align:left; }
+    th { background:#f0f0f0; color:#444; }
+    .inline { display:flex; gap:10px; }
+    .inline > * { flex:1; }
+  </style>
+  <script>
+    function showSection(id) {
+      var sections = document.querySelectorAll('.section');
+      sections.forEach(function(s) {
+        s.classList.remove('active');
+      });
+      document.getElementById(id).classList.add('active');
+    }
+    window.onload = function() {
+      // sempre abre a aba "edicao" para preencher o formulário
+      showSection('edicao');
+    };
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Painel de Controle SISU</h1>
+    <div class="tabs">
+      <button class="btn" onclick="showSection('edicao')">✏️ Edição</button>
+      <button class="btn" onclick="showSection('convocacao')">Convocação</button>
+      <button class="btn" onclick="showSection('curso')">Curso</button>
+      <button class="btn" onclick="showSection('candidato')">Candidato</button>
+    </div>
+    <!-- Seção Edição -->
+    <div id="edicao" class="section">
+      {% if edicao_to_edit %}
+      <h2>Editar Edição</h2>
+      <form method="post" action="/app/edicao/update">
+        <input type="hidden" name="id" value="{{ edicao_to_edit.id }}">
+      {% else %}
+      <h2>Nova Edição do SISU</h2>
+      <form method="post" action="/app/edicao/store">
+      {% endif %}
+        <label>Nome da Edição:
+          <input type="text" name="nome" value="{{ edicao_to_edit.nome if edicao_to_edit else '' }}" placeholder="Ex: SISU 2025.1" required>
+        </label>
+        <h3>Vagas por Curso</h3>
+        <table>
+          <thead><tr><th>Curso</th><th>AC</th><th>PPI + BR</th><th>Pública + BR</th><th>PPI + Pública</th><th>Pública</th><th>Deficientes</th></tr></thead>
+          <tbody>
+            {% for curso in cursos %}
+            <tr>
+              {% set det = detalhes[loop.index0] if detalhes|length > loop.index0 else None %}
+              <input type="hidden" name="cursos[{{ loop.index0 }}][curso_id]" value="{{ curso.id }}">
+              <td>{{ curso.nome }}</td>
+              <td><input type="number" name="cursos[{{ loop.index0 }}][vagas_ac]" value="{{ det.vagas_ac if det else 0 }}" min="0"></td>
+              <td><input type="number" name="cursos[{{ loop.index0 }}][vagas_ppi_br]" value="{{ det.vagas_ppi_br if det else 0 }}" min="0"></td>
+              <td><input type="number" name="cursos[{{ loop.index0 }}][vagas_publica_br]" value="{{ det.vagas_publica_br if det else 0 }}" min="0"></td>
+              <td><input type="number" name="cursos[{{ loop.index0 }}][vagas_ppi_publica]" value="{{ det.vagas_ppi_publica if det else 0 }}" min="0"></td>
+              <td><input type="number" name="cursos[{{ loop.index0 }}][vagas_publica]" value="{{ det.vagas_publica if det else 0 }}" min="0"></td>
+              <td><input type="number" name="cursos[{{ loop.index0 }}][vagas_deficientes]" value="{{ det.vagas_deficientes if det else 0 }}" min="0"></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <button class="btn" type="submit" style="margin-top:12px">{% if edicao_to_edit %}Salvar Alterações{% else %}Salvar Edição{% endif %}</button>
+      </form>
+      <h3 style="margin-top:30px">Edições Cadastradas</h3>
+      <table>
+        <thead><tr><th>ID</th><th>Nome</th><th>Ações</th></tr></thead>
+        <tbody>
+          {% for e in edicoes %}
+          <tr>
+            <td>{{ e.id }}</td><td>{{ e.nome }}</td>
+            <td class="inline">
+              <!-- chama Dashboard#index para preencher edição -->
+              <form method="get" action="/app/dashboard/index" style="margin:0">
+                <input type="hidden" name="id" value="{{ e.id }}">
+                <button class="btn" type="submit">✏️</button>
+              </form>
+              <form method="get" action="/app/edicao/delete" style="margin:0" onsubmit="return confirm('Excluir edição {{ e.nome }}?')">
+                <input type="hidden" name="id" value="{{ e.id }}">
+                <button class="btn" type="submit">🗑️</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <!-- Seção Convocação -->
+    <div id="convocacao" class="section">
+      <h2>Gerar Convocação</h2>
+      <form method="post" action="/app/convocacao/gerar">
+        <label>Selecione a Edição:
+          <select name="edicao_id" required>
+            <option value="">-- escolha --</option>
+            {% for e in edicoes %}<option value="{{ e.id }}">{{ e.nome }}</option>{% endfor %}
+          </select>
+        </label><br><br>
+        <label>Selecione os Cursos (Ctrl/⌘ + clique):
+          <select name="curso_ids" multiple size="6" required>
+            {% for c in cursos %}<option value="{{ c.id }}">{{ c.nome }}</option>{% endfor %}
+          </select>
+        </label><br><br>
+        <label>Multiplicador (X):
+          <input type="number" name="multiplicador" value="1" min="1">
+        </label><br><br>
+        <button class="btn" type="submit">Gerar Convocação</button>
+      </form>
+    </div>
+    <!-- Seção Curso -->
+    <div id="curso" class="section">
+      <h2>Gestão de Cursos</h2>
+      <form method="post" action="/app/curso/store">
+        <input type="hidden" name="id" value="{{ curso.id if curso else '' }}">
+        {% if curso and curso.id %}<input type="hidden" name="_method" value="PUT">{% endif %}
+        <label>Nome do Curso:
+          <input type="text" name="nome" value="{{ curso.nome if curso else '' }}" placeholder="Ex: Engenharia" required>
+        </label>
+        <button class="btn" type="submit">{% if curso and curso.id %}Atualizar{% else %}Salvar{% endif %}</button>
+      </form>
+      <h3 style="margin-top:30px">Cursos Cadastrados</h3>
+      <table>
+        <thead><tr><th>ID</th><th>Nome</th><th>Ações</th></tr></thead>
+        <tbody>
+          {% for c in cursos %}
+          <tr>
+            <td>{{ c.id }}</td><td>{{ c.nome }}</td>
+            <td class="inline">
+              <form method="get" action="/app/curso/edit" style="margin:0">
+                <input type="hidden" name="id" value="{{ c.id }}">
+                <button class="btn" type="submit">✏️</button>
+              </form>
+              <form method="get" action="/app/curso/delete" style="margin:0" onsubmit="return confirm('Excluir curso {{ c.nome }}?')">
+                <input type="hidden" name="id" value="{{ c.id }}">
+                <button class="btn" type="submit">🗑️</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <!-- Seção Candidato -->
+    <div id="candidato" class="section">
+      <h2>Gestão de Candidatos</h2>
+      <form method="post" action="/app/candidato/store">
+        <input type="hidden" name="id" value="{{ candidato_to_edit.id if candidato_to_edit else '' }}">
+        {% if candidato_to_edit %}<input type="hidden" name="_method" value="PUT">{% endif %}
+        <label>Nome:
+          <input type="text" name="nome" value="{{ candidato_to_edit.nome if candidato_to_edit else '' }}" placeholder="Ex: João Silva" required>
+        </label>
+        <label>CPF:
+          <input type="text" name="cpf" value="{{ candidato_to_edit.cpf if candidato_to_edit else '' }}" placeholder="Somente números" required>
+        </label>
+        <label>Data Nascimento:
+          <input type="date" name="data_nascimento" value="{{ candidato_to_edit.data_nascimento if candidato_to_edit else '' }}" required>
+        </label>
+        <label>Categoria:
+          <select name="categoria" required>
+            <option value="">-- escolha --</option>
+            {% for m in modalidades %}
+              <option value="{{ m }}" {% if candidato_to_edit and candidato_to_edit.categoria == m %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <!-- aqui trocamos o campo de ID por um select de cursos -->
+        <label>Curso:
+          <select name="curso_id" required>
+            <option value="">-- escolha um curso --</option>
+            {% for curso in cursos %}
+              <option value="{{ curso.id }}" {% if candidato_to_edit and candidato_to_edit.curso_id == curso.id %}selected{% endif %}>
+                {{ curso.nome }}
+              </option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label>Nota:
+          <input type="number" step="0.01" name="nota" value="{{ candidato_to_edit.nota if candidato_to_edit else '' }}" placeholder="Ex: 750.50" required>
+        </label>
+        {% if error %}
+          <p style="color:red; margin:8px 0;">{{ error }}</p>
+        {% endif %}
+        <button class="btn" type="submit">{% if candidato_to_edit %}Atualizar{% else %}Cadastrar{% endif %}</button>
+      </form>
+
+      <h3 style="margin-top:30px">Candidatos Cadastrados</h3>
+      <table>
+        <thead>
+          <tr><th>Nome</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+          {% for cand in candidatos %}
+          <tr>
+            <td>{{ cand.nome }}</td>
+            <td class="inline">
+              <form method="get" action="/app/candidato/edit" style="margin:0">
+                <input type="hidden" name="id" value="{{ cand.id }}">
+                <button class="btn" type="submit">✏️</button>
+              </form>
+              <!-- ALTERAÇÃO: agora usa GET para delete -->
+              <form method="get" action="/app/candidato/delete" style="margin:0" onsubmit="return confirm('Excluir candidato {{ cand.nome }}?')">
+                <input type="hidden" name="id" value="{{ cand.id }}">
+                <button class="btn" type="submit">🗑️</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

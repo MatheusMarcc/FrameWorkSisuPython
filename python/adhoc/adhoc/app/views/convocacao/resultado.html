@@ -1,0 +1,22 @@
+<h1>Convocação: {{ edicao.nome }}</h1>
+
+{% for item in listas %}
+  <h2>Curso: {{ item.curso.nome }}</h2>
+
+  {% for categoria, lista in item.resultado.items() %}
+    <h3>{{ categoria }}</h3>
+    {% if lista and lista|length > 0 %}
+      <ul>
+        {% for c in lista %}
+          <li>{{ c.nome }} (Nota: {{ c.nota }})</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Nenhum convocado nesta categoria.</p>
+    {% endif %}
+  {% endfor %}
+
+  <hr>
+{% endfor %}
+
+<a href="/app/convocacao/index">← Voltar</a>

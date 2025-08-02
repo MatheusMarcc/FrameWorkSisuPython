@@ -1,0 +1,20 @@
+<h1>Lista de Candidatos</h1>
+<a href="/app/candidato/create">Novo Candidato</a>
+<table border="1">
+    <tr>
+        <th>ID</th><th>Nome</th><th>CPF</th><th>Categoria</th><th>Nota</th><th>Ações</th>
+    </tr>
+    {% for candidato in candidatos %}
+    <tr>
+        <td>{{ candidato.id }}</td>
+        <td>{{ candidato.nome }}</td>
+        <td>{{ candidato.cpf }}</td>
+        <td>{{ candidato.categoria }}</td>
+        <td>{{ candidato.nota }}</td>
+        <td>
+            <a href="/app/candidato/edit?id={{ candidato.id }}">Editar</a>
+            <a href="/app/candidato/delete?id={{ candidato.id }}">Excluir</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
